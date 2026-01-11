@@ -129,3 +129,77 @@ class TestMain:
         finally:
             if os.path.exists(output_path):
                 os.unlink(output_path)
+
+
+class TestTraceFocusIntegration:
+    """Test --trace-focus flag integration (TDD Red Phase)"""
+    
+    @pytest.mark.asyncio
+    async def test_process_urls_calls_trace_focus_when_flag_set(self):
+        """Should call trace_focus_path when trace_focus=True"""
+        with patch('focus_order_tester.main.AxeRunner') as MockRunner:
+            mock_instance = AsyncMock()
+            mock_instance.analyze.return_value = []
+            MockRunner.return_value.__aenter__.return_value = mock_instance
+            
+            with patch('focus_order_tester.main.trace_focus_path') as mock_trace:
+                mock_trace.return_value = {
+                    "url": "https://example.com",
+                    "focus_path": [{"position": 0, "tag_name": "button"}],
+                    "element_count": 1
+                }
+                
+                results = await process_urls(
+                    ["https://example.com"],
+                    trace_focus=True
+                )
+                
+                # trace_focus_path should be called
+                mock_trace.assert_called_once()
+                # Result should include focus_path
+                assert "focus_path" in results[0]
+    
+    @pytest.mark.asyncio
+    async def test_process_urls_skips_trace_when_flag_false(self):
+        """Should NOT call trace_focus_path when trace_focus=False"""
+        with patch('focus_order_tester.main.AxeRunner') as MockRunner:
+            mock_instance = AsyncMock()
+            mock_instance.analyze.return_value = []
+            MockRunner.return_value.__aenter__.return_value = mock_instance
+            
+            with patch('focus_order_tester.main.trace_focus_path') as mock_trace:
+                results = await process_urls(
+                    ["https://example.com"],
+                    trace_focus=False
+                )
+                
+                # trace_focus_path should NOT be called
+                mock_trace.assert_not_called()
+                # Result should NOT include focus_path
+                assert "focus_path" not in results[0]
+    
+    @pytest.mark.asyncio
+    async def test_focus_path_included_in_result(self):
+        """Focus path data should be properly structured in result"""
+        with patch('focus_order_tester.main.AxeRunner') as MockRunner:
+            mock_instance = AsyncMock()
+            mock_instance.analyze.return_value = []
+            MockRunner.return_value.__aenter__.return_value = mock_instance
+            
+            with patch('focus_order_tester.main.trace_focus_path') as mock_trace:
+                mock_trace.return_value = {
+                    "url": "https://example.com",
+                    "focus_path": [
+                        {"position": 0, "tag_name": "button", "selector": "#btn1"},
+                        {"position": 1, "tag_name": "a", "selector": "#link1"}
+                    ],
+                    "element_count": 2
+                }
+                
+                results = await process_urls(
+                    ["https://example.com"],
+                    trace_focus=True
+                )
+                
+                assert results[0]["focus_path"] == mock_trace.return_value["focus_path"]
+                assert results[0]["focus_element_count"] == 2

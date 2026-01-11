@@ -124,6 +124,12 @@ async def process_urls(
                 ]
                 result["violation_count"] = len(violations)
                 
+                # Focus path tracing
+                if trace_focus:
+                    trace_result = await trace_focus_path(url, headless=headless)
+                    result["focus_path"] = trace_result.get("focus_path", [])
+                    result["focus_element_count"] = trace_result.get("element_count", 0)
+                
             except Exception as e:
                 result["error"] = str(e)
                 result["violation_count"] = 0
@@ -132,6 +138,7 @@ async def process_urls(
             print(f"✓ Processed: {url} ({result.get('violation_count', 0)} violations)")
     
     return results
+
 
 
 async def main(args: Optional[List[str]] = None) -> None:
