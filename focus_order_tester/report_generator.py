@@ -262,6 +262,33 @@ def generate_md_report(
                 md_parts.append(f"| {pos} | `{tag}` | `{selector}` | {text} |")
             md_parts.append("")
         
+        # Trigger analysis section
+        trigger_results = result.get("trigger_results", [])
+        if trigger_results:
+            md_parts.append("### 🔘 Trigger Click Analysis")
+            md_parts.append("")
+            md_parts.append("Analysis of focus behavior after clicking interactive elements (F85 check).")
+            md_parts.append("")
+            md_parts.append("| Trigger | Dialog | Distance | Status |")
+            md_parts.append("|---------|--------|----------|--------|")
+            
+            for res in trigger_results:
+                trigger = f"`{res.get('trigger', '')}`"
+                dialog = f"`{res.get('dialog', 'None')}`" if res.get('dialog') else "None"
+                distance = res.get('distance', -1)
+                
+                status = "✅ Pass"
+                if res.get('f85_violation'):
+                    status = "❌ **VIOLATION (F85)**"
+                elif not res.get('dialog'):
+                    status = "⚠️ No Dialog Opened"
+                elif distance > 1:
+                     # Warn if distance is high but not strictly marked as violation yet (though logic says it is)
+                     status = f"⚠️ Distance: {distance}"
+                
+                md_parts.append(f"| {trigger} | {dialog} | {distance} | {status} |")
+            md_parts.append("")
+        
         md_parts.append("---")
         md_parts.append("")
     
