@@ -245,6 +245,23 @@ def generate_md_report(
                         md_parts.append(f"  ```")
                     md_parts.append("")
         
+        # Focus path section
+        focus_path = result.get("focus_path", [])
+        if focus_path:
+            md_parts.append("### 🔍 Focus Path Trace")
+            md_parts.append("")
+            md_parts.append(f"**Total focusable elements:** {len(focus_path)}")
+            md_parts.append("")
+            md_parts.append("| # | Tag | Selector | Text |")
+            md_parts.append("|---|-----|----------|------|")
+            for item in focus_path:
+                pos = item.get("position", 0)
+                tag = item.get("tag_name", "")
+                selector = item.get("selector", "")
+                text = item.get("text_content", "")[:30]  # Truncate long text
+                md_parts.append(f"| {pos} | `{tag}` | `{selector}` | {text} |")
+            md_parts.append("")
+        
         md_parts.append("---")
         md_parts.append("")
     
