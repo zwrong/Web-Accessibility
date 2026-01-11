@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pass Example - Correct Focus Order</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        nav a {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            background: #e8f5e9;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Correct Focus Order Example</h1>
+    <p>This page demonstrates correct focus order - NO violations expected.</p>
+
+    <!-- 
+    This page follows best practices:
+    - No positive tabindex values
+    - DOM order matches visual order  
+    - All interactive elements are properly focusable
+    -->
+
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <main>
+        <section>
+            <h2>Main Content</h2>
+            <p>This is the main content area.</p>
+            <button>Primary Action</button>
+            <button>Secondary Action</button>
+        </section>
+    </main>
+
+    <footer>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+    </footer>
+</body>
+
+</html>

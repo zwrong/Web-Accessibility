@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>F44 Test - Bad Tabindex</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        a { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>W3C F44 Failure Test Case</h1>
+    <p>This page demonstrates tabindex &gt; 0 creating incorrect focus order.</p>
+    
+    <!-- 
+    Expected visual order: Homepage, Chapter 1, Chapter 2, Chapter 3
+    Actual tab order: Homepage(1), Chapter 3(2), Chapter 2(3), Chapter 1(4)
+    This is a WCAG 2.4.3 violation!
+    -->
+    
+    <nav>
+        <ol>
+            <li><a href="#" tabindex="1">Homepage</a></li>
+            <li><a href="#" tabindex="4">Chapter 1</a></li>
+            <li><a href="#" tabindex="3">Chapter 2</a></li>
+            <li><a href="#" tabindex="2">Chapter 3</a></li>
+        </ol>
+    </nav>
+    
+    <p>When using Tab key, the order will be:</p>
+    <ol>
+        <li>Homepage (tabindex=1)</li>
+        <li>Chapter 3 (tabindex=2)</li>
+        <li>Chapter 2 (tabindex=3)</li>
+        <li>Chapter 1 (tabindex=4)</li>
+    </ol>
+    
+    <p><strong>Expected violation:</strong> tabindex rule should detect values &gt; 0</p>
+</body>
+</html>
