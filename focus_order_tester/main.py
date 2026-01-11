@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional
 from .url_handler import parse_urls, read_urls_from_file, validate_url
 from .axe_runner import AxeRunner, run_axe_analysis
 from .focus_tracer import trace_focus_path
-from .report_generator import generate_json_report, generate_html_report
+from .report_generator import generate_json_report, generate_html_report, generate_md_report
 
 
 def parse_args(args: Optional[List[str]] = None) -> argparse.Namespace:
@@ -61,7 +61,7 @@ Examples:
     
     parser.add_argument(
         "--format",
-        choices=["json", "html"],
+        choices=["json", "html", "md"],
         default="json",
         help="Output format (default: json)"
     )
@@ -170,6 +170,8 @@ async def main(args: Optional[List[str]] = None) -> None:
     # Generate report
     if parsed.format == "html":
         report = generate_html_report(results, output_path=parsed.output)
+    elif parsed.format == "md":
+        report = generate_md_report(results, output_path=parsed.output)
     else:
         report = generate_json_report(results, output_path=parsed.output)
     

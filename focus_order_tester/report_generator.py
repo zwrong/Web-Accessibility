@@ -158,3 +158,99 @@ def generate_html_report(
         Path(output_path).write_text(html, encoding='utf-8')
     
     return html
+
+
+def generate_md_report(
+    results: List[Dict[str, Any]], 
+    output_path: Optional[str] = None
+) -> str:
+    """
+    Generate a Markdown report from test results.
+    
+    Args:
+        results: List of test results
+        output_path: Optional path to write the report
+        
+    Returns:
+        Markdown string of the report
+    """
+    generator = ReportGenerator(results)
+    summary = generator.get_summary()
+    
+    md_parts = [
+        "# WCAG 2.4.3 Focus Order Test Report",
+        "",
+        f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "",
+        "## Summary",
+        "",
+        f"| Metric | Value |",
+        f"|--------|-------|",
+        f"| Total Pages | {summary['total_pages']} |",
+        f"| Pages with Violations | {summary['pages_with_violations']} |",
+        f"| Pages Passed | {summary['pages_passed']} |",
+        f"| Total Violations | {summary['total_violations']} |",
+        "",
+        "---",
+        "",
+    ]
+    
+    for result in results:
+        url = result.get("url", "Unknown")
+        violations = result.get("violations", [])
+        error = result.get("error")
+        
+        status = "❌" if violations else "✅"
+        md_parts.append(f"## {status} {url}")
+        md_parts.append("")
+        
+        if error:
+            md_parts.append(f"> ⚠️ **Error:** {error}")
+            md_parts.append("")
+            continue
+        
+        if not violations:
+            md_parts.append("**Status:** Pass - No violations detected")
+            md_parts.append("")
+        else:
+            md_parts.append(f"**Violations Found:** {len(violations)}")
+            md_parts.append("")
+            
+            for v in violations:
+                rule_id = v.get("rule_id", "Unknown")
+                impact = v.get("impact", "minor")
+                description = v.get("description", "")
+                help_url = v.get("help_url", "")
+                
+                md_parts.append(f"### 🔴 {rule_id} ({impact})")
+                md_parts.append("")
+                md_parts.append(f"{description}")
+                md_parts.append("")
+                
+                if help_url:
+                    md_parts.append(f"📖 [Learn more]({help_url})")
+                    md_parts.append("")
+                
+                nodes = v.get("nodes", [])
+                if nodes:
+                    md_parts.append("**Affected Elements:**")
+                    md_parts.append("")
+                    for node in nodes:
+                        html = node.get("html", "").replace("`", "'")
+                        target = node.get("target", [])
+                        target_str = " > ".join(target) if target else ""
+                        md_parts.append(f"- `{target_str}`")
+                        md_parts.append(f"  ```html")
+                        md_parts.append(f"  {html}")
+                        md_parts.append(f"  ```")
+                    md_parts.append("")
+        
+        md_parts.append("---")
+        md_parts.append("")
+    
+    md = "\n".join(md_parts)
+    
+    if output_path:
+        Path(output_path).write_text(md, encoding='utf-8')
+    
+    return md
