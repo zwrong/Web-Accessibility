@@ -18,7 +18,8 @@ from pathlib import Path
 from focus_order_tester.report_generator import (
     ReportGenerator,
     generate_json_report,
-    generate_html_report
+    generate_html_report,
+    generate_md_report
 )
 
 
@@ -134,3 +135,67 @@ class TestGenerateHtmlReport:
         finally:
             if os.path.exists(filepath):
                 os.unlink(filepath)
+
+
+class TestGenerateMdReport:
+    """Test Markdown report generation"""
+    
+    def test_generate_md_report_returns_string(self):
+        """Should return markdown string"""
+        results = [{"url": "https://example.com", "violations": []}]
+        md = generate_md_report(results)
+        assert "# WCAG 2.4.3" in md
+        assert "## Summary" in md
+    
+    def test_md_report_contains_summary_table(self):
+        """Should include summary table"""
+        results = [{"url": "https://example.com", "violations": []}]
+        md = generate_md_report(results)
+        assert "| Metric | Value |" in md
+        assert "Total Pages" in md
+    
+    def test_md_report_contains_violations(self):
+        """Should display violation details"""
+        results = [{
+            "url": "https://example.com",
+            "violations": [{
+                "rule_id": "tabindex",
+                "description": "Elements should not have tabindex greater than zero",
+                "impact": "serious",
+                "help_url": "https://example.com/help",
+                "nodes": [{"html": "<p tabindex='1'>", "target": ["#test"]}]
+            }]
+        }]
+        md = generate_md_report(results)
+        assert "tabindex" in md
+        assert "serious" in md
+        assert "```html" in md
+    
+    def test_md_report_shows_pass_for_no_violations(self):
+        """Should show pass status when no violations"""
+        results = [{"url": "https://example.com", "violations": []}]
+        md = generate_md_report(results)
+        assert "✅" in md or "Pass" in md
+    
+    def test_md_report_shows_fail_for_violations(self):
+        """Should show fail status when violations present"""
+        results = [{"url": "https://example.com", "violations": [{"rule_id": "test"}]}]
+        md = generate_md_report(results)
+        assert "❌" in md
+    
+    def test_write_md_to_file(self):
+        """Should write markdown report to file"""
+        results = [{"url": "https://example.com", "violations": []}]
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            filepath = f.name
+        
+        try:
+            generate_md_report(results, output_path=filepath)
+            assert os.path.exists(filepath)
+            with open(filepath) as f:
+                content = f.read()
+            assert "# WCAG 2.4.3" in content
+        finally:
+            if os.path.exists(filepath):
+                os.unlink(filepath)
+
