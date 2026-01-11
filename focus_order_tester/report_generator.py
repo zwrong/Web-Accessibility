@@ -207,7 +207,6 @@ def generate_md_report(
         if error:
             md_parts.append(f"> ⚠️ **Error:** {error}")
             md_parts.append("")
-            continue
         
         if not violations:
             md_parts.append("**Status:** Pass - No violations detected")

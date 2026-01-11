@@ -84,8 +84,16 @@ class AxeRunner:
     
     async def _run_axe(self, page: Page) -> Dict[str, Any]:
         """Inject axe-core and run analysis"""
-        # Inject axe-core from CDN
-        await page.add_script_tag(url="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.4/axe.min.js")
+        # Dictionary of local paths to check
+        # We check relative to current working directory
+        import os
+        local_axe = "lib/axe.min.js"
+        
+        if os.path.exists(local_axe):
+            await page.add_script_tag(path=local_axe)
+        else:
+            # Fallback to CDN
+            await page.add_script_tag(url="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.4/axe.min.js")
         
         # Run axe with focus order related rules
         results = await page.evaluate("""
